@@ -780,26 +780,31 @@ class App {
         }
 
         const sim = window.InputShaper.simulateResponse(shaped, dt, fn, zeta, { payloadLoaded });
-        let motionEndIdx = shaped.length - 1;
-        for (let i = shaped.length - 1; i >= 0; i--) {
-          if (Math.abs(shaped[i] - distance) > 0.001) { motionEndIdx = i + 1; break; }
-        }
+
+        // Use computeVibration — same method as HUD for consistency
+        const vibration = window.InputShaper.computeVibration(sim.position, shaped);
+
+        // Peak residual vibration (same as HUD's computeResidualVibration)
+        const settleIdx = Math.round(motionTime / dt);
         let peakVib = 0;
-        for (let i = motionEndIdx; i < sim.position.length; i++) {
-          const v = Math.abs(sim.position[i] - distance);
+        for (let i = settleIdx; i < vibration.length; i++) {
+          const v = Math.abs(vibration[i]);
           if (v > peakVib) peakVib = v;
         }
-        // Forward settling time (with payload)
-        let fwdSettlingTime = motionEndIdx * dt;
-        for (let i = sim.position.length - 1; i >= motionEndIdx; i--) {
-          if (Math.abs(sim.position[i] - distance) > 0.005) { fwdSettlingTime = i * dt; break; }
+
+        // Forward settling time — scan backwards for last vibration > tolerance (same as HUD)
+        const tol = 0.005;
+        let fwdSettlingTime = motionTime;
+        for (let i = vibration.length - 1; i >= 0; i--) {
+          if (Math.abs(vibration[i]) > tol) { fwdSettlingTime = i * dt; break; }
         }
 
-        // Return trip settling time (ALWAYS unloaded, matching HUD logic)
+        // Return trip (ALWAYS unloaded, matching HUD logic)
         const returnSim = window.InputShaper.simulateResponse(shaped, dt, fn, zeta, { payloadLoaded: false });
-        let retSettlingTime = motionEndIdx * dt;
-        for (let i = returnSim.position.length - 1; i >= motionEndIdx; i--) {
-          if (Math.abs(returnSim.position[i] - distance) > 0.005) { retSettlingTime = i * dt; break; }
+        const returnVib = window.InputShaper.computeVibration(returnSim.position, shaped);
+        let retSettlingTime = motionTime;
+        for (let i = returnVib.length - 1; i >= 0; i--) {
+          if (Math.abs(returnVib[i]) > tol) { retSettlingTime = i * dt; break; }
         }
 
         // UPH = 3600 / (Forward + Return) — matches HUD round-trip calculation
