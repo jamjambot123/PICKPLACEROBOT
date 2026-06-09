@@ -558,6 +558,16 @@ input:checked + .slider-toggle:before {
   flex: 1;
   width: 100%;
   position: relative;
+  overflow: hidden;
+}
+
+/* Three.js canvas must not affect parent layout */
+.viewport-container > canvas {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Overlay Elements */
