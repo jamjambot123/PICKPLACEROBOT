@@ -234,8 +234,10 @@ html, body {
 /* ===== Main Content ===== */
 .main-content {
   display: flex;
+  flex-direction: column;
   flex: 1;
-  height: calc(100% - var(--header-height));
+  height: 0;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -801,7 +803,9 @@ input:checked + .slider-toggle:before {
 .tab-content {
   display: none;
   width: 100%;
-  height: 100%;
+  flex: 1;
+  height: 0;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -812,7 +816,14 @@ input:checked + .slider-toggle:before {
 
 /* Tab 1 (simulator) needs special treatment - it has viewport-area */
 #tab-simulator.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+}
+
+#tab-simulator .viewport-area {
+  flex: 1;
+  height: 0;
+  min-height: 0;
 }
 
 /* ===== Tab Pages (for tabs 2-4) ===== */
