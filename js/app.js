@@ -137,20 +137,7 @@ class App {
     const activeTab = document.getElementById(`tab-${tabName}`);
     if (activeTab) activeTab.classList.add('active');
 
-    // Show/hide config bar (only for simulator tab)
-    const configBar = document.getElementById('config-bar');
-    if (configBar) {
-      // Use visibility + height instead of display to prevent layout shift
-      if (tabName === 'simulator') {
-        configBar.style.visibility = 'visible';
-        configBar.style.height = '60px';
-        configBar.style.overflow = 'visible';
-      } else {
-        configBar.style.visibility = 'hidden';
-        configBar.style.height = '0px';
-        configBar.style.overflow = 'hidden';
-      }
-    }
+    // Config bar is now inside #tab-simulator, no need to toggle it
 
     // Lazy-init modules
     if (tabName === 'sweep' && !this.sweepManager && window.SweepManager) {

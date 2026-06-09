@@ -47,82 +47,82 @@
       </button>
     </nav>
 
-    <!-- ═══ ACADEMIC CONFIG BAR (TOP) ═══ -->
-    <header class="config-bar" id="config-bar">
-      <div class="config-brand">
-        <span class="icon">⚙</span>
-        <h1>디지털 트윈 시뮬레이터</h1>
-      </div>
-      
-      <div class="config-inputs">
-        <div class="config-item">
-          <label>궤적(Profile):</label>
-          <select id="select-profile" class="config-select">
-            <option value="ascurve" selected>AS-Curve (비대칭형)</option>
-            <option value="scurve">S-Curve (대칭형)</option>
-            <option value="trapezoidal">Trapezoidal (사다리꼴)</option>
-          </select>
-        </div>
-        
-        <div class="config-item">
-          <label>제어(Shaper):</label>
-          <select id="select-shaper" class="config-select">
-            <option value="none">미적용 (None)</option>
-            <option value="ZV" selected>ZV 쉐이퍼</option>
-            <option value="ZVD">ZVD 쉐이퍼</option>
-            <option value="EI">EI 쉐이퍼</option>
-          </select>
-        </div>
-
-        <div class="config-item"><label>V<sub>max</sub>:</label><input type="number" id="slider-vmax" value="1000" step="50" min="10" max="3000" class="config-num"></div>
-        <div class="config-item"><label>A<sub>max</sub>:</label><input type="number" id="slider-amax" value="20000" step="500" min="10" max="50000" class="config-num"></div>
-        <div class="config-item"><label>β:</label><input type="number" id="slider-beta" value="0.5" step="0.05" min="0.1" max="1.0" class="config-num"></div>
-        <div class="config-item"><label>γ:</label><input type="number" id="slider-gamma" value="0.2" step="0.05" min="0.1" max="2.0" class="config-num"></div>
-        <div class="config-item"><label>f<sub>n</sub>:</label><input type="number" id="slider-fn" value="10" step="0.5" min="1" max="100" class="config-num"></div>
-        <div class="config-item" style="display:flex; align-items:center; gap:4px;">
-          <input type="checkbox" id="toggle-payload" checked style="cursor:pointer; width:16px; height:16px;">
-          <label for="toggle-payload" style="cursor:pointer;">화물(Payload)</label>
-        </div>
-        
-        <!-- Hidden required inputs for JS binding to not crash -->
-        <input type="hidden" id="slider-jmax" value="200000">
-        <input type="hidden" id="slider-zeta" value="0.05">
-        <input type="hidden" id="slider-friction" value="0">
-        <input type="hidden" id="slider-stiffness" value="1">
-        <input type="hidden" id="slider-pickx" value="15">
-        <input type="hidden" id="slider-placex" value="65">
-      </div>
-      
-      <div class="config-actions">
-        <button id="btn-compare" class="btn-run" style="background:var(--accent-green); color:#fff; border-color:var(--accent-green);">📊 3-프로파일 비교</button>
-        <button id="btn-run-ai" class="btn-ai">✨ AI 자동 튜닝</button>
-        <div class="speed-group" style="display:flex; align-items:center; gap:2px; margin:0 8px;">
-          <span style="font-size:10px; color:var(--text-secondary); margin-right:4px;">속도:</span>
-          <button class="speed-btn" data-speed="0.1" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">0.1x</button>
-          <button class="speed-btn" data-speed="0.3" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">0.3x</button>
-          <button class="speed-btn active" data-speed="1" style="padding:3px 6px; font-size:10px; border:1px solid var(--accent-cyan); border-radius:3px; background:var(--accent-cyan); color:#fff; cursor:pointer; font-weight:600;">1x</button>
-          <button class="speed-btn" data-speed="3" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">3x</button>
-        </div>
-        <button id="btn-reset" class="btn-icon">⟳</button>
-        <button id="btn-start" class="btn-run">▶ 시뮬레이션 실행</button>
-      </div>
-    </header>
-
-    <!-- AI Progress Bar (hidden by default) -->
-    <div id="ai-progress-container" class="ai-progress-overlay" style="display: none;">
-      <div class="ai-progress-box">
-        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: 8px; font-weight: 600;">AI PSO 최적화 진행 중... <span id="ai-progress-text" style="color:var(--accent-orange)">0%</span></div>
-        <div style="height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">
-          <div id="ai-progress-bar" style="height: 100%; width: 0%; background: var(--accent-orange); transition: width 0.1s linear;"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- ═══ FULLSCREEN VIEWPORT ═══ -->
     <div class="main-content">
 
       <!-- TAB 1: Simulator (existing) -->
       <div class="tab-content active" id="tab-simulator">
+
+      <!-- Config bar is INSIDE the simulator tab -->
+      <header class="config-bar" id="config-bar">
+        <div class="config-brand">
+          <span class="icon">⚙</span>
+          <h1>디지털 트윈 시뮬레이터</h1>
+        </div>
+        
+        <div class="config-inputs">
+          <div class="config-item">
+            <label>궤적(Profile):</label>
+            <select id="select-profile" class="config-select">
+              <option value="ascurve" selected>AS-Curve (비대칭형)</option>
+              <option value="scurve">S-Curve (대칭형)</option>
+              <option value="trapezoidal">Trapezoidal (사다리꼴)</option>
+            </select>
+          </div>
+          
+          <div class="config-item">
+            <label>제어(Shaper):</label>
+            <select id="select-shaper" class="config-select">
+              <option value="none">미적용 (None)</option>
+              <option value="ZV" selected>ZV 쉐이퍼</option>
+              <option value="ZVD">ZVD 쉐이퍼</option>
+              <option value="EI">EI 쉐이퍼</option>
+            </select>
+          </div>
+
+          <div class="config-item"><label>V<sub>max</sub>:</label><input type="number" id="slider-vmax" value="1000" step="50" min="10" max="3000" class="config-num"></div>
+          <div class="config-item"><label>A<sub>max</sub>:</label><input type="number" id="slider-amax" value="20000" step="500" min="10" max="50000" class="config-num"></div>
+          <div class="config-item"><label>β:</label><input type="number" id="slider-beta" value="0.5" step="0.05" min="0.1" max="1.0" class="config-num"></div>
+          <div class="config-item"><label>γ:</label><input type="number" id="slider-gamma" value="0.2" step="0.05" min="0.1" max="2.0" class="config-num"></div>
+          <div class="config-item"><label>f<sub>n</sub>:</label><input type="number" id="slider-fn" value="10" step="0.5" min="1" max="100" class="config-num"></div>
+          <div class="config-item" style="display:flex; align-items:center; gap:4px;">
+            <input type="checkbox" id="toggle-payload" checked style="cursor:pointer; width:16px; height:16px;">
+            <label for="toggle-payload" style="cursor:pointer;">화물(Payload)</label>
+          </div>
+          
+          <!-- Hidden required inputs for JS binding to not crash -->
+          <input type="hidden" id="slider-jmax" value="200000">
+          <input type="hidden" id="slider-zeta" value="0.05">
+          <input type="hidden" id="slider-friction" value="0">
+          <input type="hidden" id="slider-stiffness" value="1">
+          <input type="hidden" id="slider-pickx" value="15">
+          <input type="hidden" id="slider-placex" value="65">
+        </div>
+        
+        <div class="config-actions">
+          <button id="btn-compare" class="btn-run" style="background:var(--accent-green); color:#fff; border-color:var(--accent-green);">📊 3-프로파일 비교</button>
+          <button id="btn-run-ai" class="btn-ai">✨ AI 자동 튜닝</button>
+          <div class="speed-group" style="display:flex; align-items:center; gap:2px; margin:0 8px;">
+            <span style="font-size:10px; color:var(--text-secondary); margin-right:4px;">속도:</span>
+            <button class="speed-btn" data-speed="0.1" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">0.1x</button>
+            <button class="speed-btn" data-speed="0.3" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">0.3x</button>
+            <button class="speed-btn active" data-speed="1" style="padding:3px 6px; font-size:10px; border:1px solid var(--accent-cyan); border-radius:3px; background:var(--accent-cyan); color:#fff; cursor:pointer; font-weight:600;">1x</button>
+            <button class="speed-btn" data-speed="3" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">3x</button>
+          </div>
+          <button id="btn-reset" class="btn-icon">⟳</button>
+          <button id="btn-start" class="btn-run">▶ 시뮬레이션 실행</button>
+        </div>
+      </header>
+
+      <!-- AI Progress Bar (hidden by default) -->
+      <div id="ai-progress-container" class="ai-progress-overlay" style="display: none;">
+        <div class="ai-progress-box">
+          <div style="font-size: 12px; color: var(--text-primary); margin-bottom: 8px; font-weight: 600;">AI PSO 최적화 진행 중... <span id="ai-progress-text" style="color:var(--accent-orange)">0%</span></div>
+          <div style="height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">
+            <div id="ai-progress-bar" style="height: 100%; width: 0%; background: var(--accent-orange); transition: width 0.1s linear;"></div>
+          </div>
+        </div>
+      </div>
       <div class="viewport-area">
         <div id="viewport" class="viewport-container">
           
