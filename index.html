@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Pick & Place Robot Digital Twin Simulator" />
+  <title>Academic Pick &amp; Place Digital Twin</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+  
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    
+    <!-- ═══ ACADEMIC CONFIG BAR (TOP) ═══ -->
+    <header class="config-bar">
+      <div class="config-brand">
+        <span class="icon">⚙</span>
+        <h1>디지털 트윈 시뮬레이터</h1>
+      </div>
+      
+      <div class="config-inputs">
+        <div class="config-item">
+          <label>궤적(Profile):</label>
+          <select id="select-profile" class="config-select">
+            <option value="ascurve" selected>AS-Curve (비대칭형)</option>
+            <option value="scurve">S-Curve (대칭형)</option>
+            <option value="trapezoidal">Trapezoidal (사다리꼴)</option>
+          </select>
+        </div>
+        
+        <div class="config-item">
+          <label>제어(Shaper):</label>
+          <select id="select-shaper" class="config-select">
+            <option value="none">미적용 (None)</option>
+            <option value="ZV" selected>ZV 쉐이퍼</option>
+            <option value="ZVD">ZVD 쉐이퍼</option>
+            <option value="EI">EI 쉐이퍼</option>
+          </select>
+        </div>
+
+        <div class="config-item"><label>V<sub>max</sub>:</label><input type="number" id="slider-vmax" value="1000" step="50" min="10" max="3000" class="config-num"></div>
+        <div class="config-item"><label>A<sub>max</sub>:</label><input type="number" id="slider-amax" value="20000" step="500" min="10" max="50000" class="config-num"></div>
+        <div class="config-item"><label>β:</label><input type="number" id="slider-beta" value="0.5" step="0.05" min="0.1" max="1.0" class="config-num"></div>
+        <div class="config-item"><label>γ:</label><input type="number" id="slider-gamma" value="0.2" step="0.05" min="0.1" max="2.0" class="config-num"></div>
+        <div class="config-item"><label>f<sub>n</sub>:</label><input type="number" id="slider-fn" value="10" step="0.5" min="1" max="100" class="config-num"></div>
+        <div class="config-item" style="display:flex; align-items:center; gap:4px;">
+          <input type="checkbox" id="toggle-payload" checked style="cursor:pointer; width:16px; height:16px;">
+          <label for="toggle-payload" style="cursor:pointer;">화물(Payload)</label>
+        </div>
+        
+        <!-- Hidden required inputs for JS binding to not crash -->
+        <input type="hidden" id="slider-jmax" value="200000">
+        <input type="hidden" id="slider-zeta" value="0.05">
+        <input type="hidden" id="slider-friction" value="0">
+        <input type="hidden" id="slider-stiffness" value="1">
+        <input type="hidden" id="slider-pickx" value="15">
+        <input type="hidden" id="slider-placex" value="65">
+      </div>
+      
+      <div class="config-actions">
+        <button id="btn-compare" class="btn-run" style="background:var(--accent-green); color:#fff; border-color:var(--accent-green);">📊 3-프로파일 비교</button>
+        <button id="btn-run-ai" class="btn-ai">✨ AI 자동 튜닝</button>
+        <div class="speed-group" style="display:flex; align-items:center; gap:2px; margin:0 8px;">
+          <span style="font-size:10px; color:var(--text-secondary); margin-right:4px;">속도:</span>
+          <button class="speed-btn" data-speed="0.1" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">0.1x</button>
+          <button class="speed-btn" data-speed="0.3" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">0.3x</button>
+          <button class="speed-btn active" data-speed="1" style="padding:3px 6px; font-size:10px; border:1px solid var(--accent-cyan); border-radius:3px; background:var(--accent-cyan); color:#fff; cursor:pointer; font-weight:600;">1x</button>
+          <button class="speed-btn" data-speed="3" style="padding:3px 6px; font-size:10px; border:1px solid var(--border-glass); border-radius:3px; background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer;">3x</button>
+        </div>
+        <button id="btn-reset" class="btn-icon">⟳</button>
+        <button id="btn-start" class="btn-run">▶ 시뮬레이션 실행</button>
+      </div>
+    </header>
+
+    <!-- AI Progress Bar (hidden by default) -->
+    <div id="ai-progress-container" class="ai-progress-overlay" style="display: none;">
+      <div class="ai-progress-box">
+        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: 8px; font-weight: 600;">AI PSO 최적화 진행 중... <span id="ai-progress-text" style="color:var(--accent-orange)">0%</span></div>
+        <div style="height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">
+          <div id="ai-progress-bar" style="height: 100%; width: 0%; background: var(--accent-orange); transition: width 0.1s linear;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FULLSCREEN VIEWPORT ═══ -->
+    <div class="main-content">
+      <div class="viewport-area">
+        <div id="viewport" class="viewport-container">
+          
+          <!-- View Toggle -->
+          <button id="btn-toggle-charts" class="btn-floating" style="top:24px; right:24px; bottom:auto;">
+            📊 분석 차트 보기
+          </button>
+          
+          <div class="viewport-overlay" style="top:24px; left:24px;">
+            <div class="status-badge" id="status-badge"><span class="dot"></span> 대기중 (IDLE)</div>
+            <div style="font-family:'JetBrains Mono', monospace; font-size:16px; color:#fff; font-weight:600; text-shadow: 0 2px 10px rgba(0,0,0,0.8); margin-top:8px;">
+              <span id="elapsed-time">0.000s</span>
+            </div>
+            
+            <div class="viewport-legend" style="margin-top: 16px;">
+              <span class="legend-dot shaped"></span> 제어 적용 (Input Shaping)
+            </div>
+            <div class="viewport-legend">
+              <span class="legend-dot unshaped"></span> 제어 미적용 (Baseline)
+            </div>
+          </div>
+          
+          <!-- Simulation Progress (replaces action area progress) -->
+          <div class="sim-progress" style="position:absolute; bottom:100px; left:24px; width:300px; z-index:5;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px; font-weight:600; text-transform:uppercase;">
+              <span id="phase-name" style="color:var(--text-secondary)">준비 완료</span>
+              <span id="progress-pct" style="color:var(--accent-cyan)">0%</span>
+            </div>
+            <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+              <div id="progress-fill" style="height:100%; width:0%; background:var(--accent-cyan);"></div>
+            </div>
+          </div>
+
+          <!-- HUD Overlay -->
+          <div class="viewport-hud" style="bottom:24px; left:24px; flex-direction: row; gap: 16px;">
+            <div class="hud-box shaped-hud" style="min-width:140px; padding:12px 16px;">
+              <h4 style="font-size:10px;">제어 적용 결과 (Shaped)</h4>
+              <div class="hud-metric" style="color:#00e5ff;">현재 진동: <span id="hud-realtime-shaped">0.0000</span></div>
+              <div class="hud-metric">정착 시간: <span id="hud-settling-shaped">0.00s</span></div>
+              <div class="hud-metric">잔류 진동: <span id="hud-vib-shaped">0.0000</span></div>
+              <div class="hud-metric" style="color:#ffea00; font-weight:bold; margin-top:4px;">예상 생산량: <span id="hud-uph-shaped">0</span> UPH</div>
+            </div>
+            <div class="hud-box unshaped-hud" style="min-width:140px; padding:12px 16px;">
+              <h4 style="font-size:10px;">제어 미적용 결과</h4>
+              <div class="hud-metric" style="color:#ff5252;">현재 진동: <span id="hud-realtime-unshaped">0.0000</span></div>
+              <div class="hud-metric">정착 시간: <span id="hud-settling-unshaped">0.00s</span></div>
+              <div class="hud-metric">잔류 진동: <span id="hud-vib-unshaped">0.0000</span></div>
+              <div class="hud-metric" style="color:#ffea00; font-weight:bold; margin-top:4px;">예상 생산량: <span id="hud-uph-unshaped">0</span> UPH</div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- ═══ ACADEMIC CHARTS PANEL (Overlay) ═══ -->
+        <div class="charts-container" id="charts-modal">
+          <div class="chart-panel">
+            <div class="chart-title"><span class="chart-title-dot" style="background: #00e5ff;"></span> 위치 추적 (Position Tracking)</div>
+            <div class="chart-wrapper"><canvas id="chart-position"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title"><span class="chart-title-dot" style="background: #e040fb;"></span> 목표 속도 궤적 (Command Velocity)</div>
+            <div class="chart-wrapper"><canvas id="chart-velocity"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title"><span class="chart-title-dot" style="background: #ff9100;"></span> 가속도 및 저크 (Accel / Jerk)</div>
+            <div class="chart-wrapper"><canvas id="chart-acceleration"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title"><span class="chart-title-dot" style="background: #ff5252;"></span> 잔류 진동 오차 (Residual Vibration)</div>
+            <div class="chart-wrapper"><canvas id="chart-vibration"></canvas></div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- ═══ 3-PROFILE COMPARISON MODAL ═══ -->
+    <div id="compare-modal" style="display:none; position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:12px; width:90%; max-width:900px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); padding:32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+          <h2 style="font-size:18px; font-weight:700; color:#1f2937;">📊 3-프로파일 비교 분석 결과</h2>
+          <button id="btn-close-compare" style="background:none; border:1px solid #d1d5db; border-radius:6px; padding:4px 12px; cursor:pointer; font-size:13px; color:#6b7280;">✕ 닫기</button>
+        </div>
+        <p style="font-size:12px; color:#6b7280; margin-bottom:16px;">동일 이송 조건(거리·속도)에서 3가지 모션 프로파일의 성능을 비교합니다.</p>
+        <div id="compare-results"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/motion-profile.js"></script>
+  <script src="js/input-shaping.js"></script>
+  <script src="js/ai-optimizer.js"></script>
+  <script src="js/robot-kinematics.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
