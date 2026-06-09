@@ -789,12 +789,23 @@ class App {
           const v = Math.abs(sim.position[i] - distance);
           if (v > peakVib) peakVib = v;
         }
-        let settlingTime = motionEndIdx * dt;
+        // Forward settling time (with payload)
+        let fwdSettlingTime = motionEndIdx * dt;
         for (let i = sim.position.length - 1; i >= motionEndIdx; i--) {
-          if (Math.abs(sim.position[i] - distance) > 0.005) { settlingTime = i * dt; break; }
+          if (Math.abs(sim.position[i] - distance) > 0.005) { fwdSettlingTime = i * dt; break; }
         }
-        const uph = settlingTime > 0 ? Math.floor(3600 / (settlingTime * 2)) : 99999;
-        results.push({ ...sc, motionTime, peakVib, settlingTime, uph, usedParams: { ...params } });
+
+        // Return trip settling time (ALWAYS unloaded, matching HUD logic)
+        const returnSim = window.InputShaper.simulateResponse(shaped, dt, fn, zeta, { payloadLoaded: false });
+        let retSettlingTime = motionEndIdx * dt;
+        for (let i = returnSim.position.length - 1; i >= motionEndIdx; i--) {
+          if (Math.abs(returnSim.position[i] - distance) > 0.005) { retSettlingTime = i * dt; break; }
+        }
+
+        // UPH = 3600 / (Forward + Return) — matches HUD round-trip calculation
+        const roundTrip = fwdSettlingTime + retSettlingTime;
+        const uph = roundTrip > 0 ? Math.floor(3600 / roundTrip) : 99999;
+        results.push({ ...sc, motionTime, peakVib, settlingTime: fwdSettlingTime, uph, usedParams: { ...params } });
       } catch (e) {
         results.push({ ...sc, motionTime: 0, peakVib: 0, settlingTime: 0, uph: 0, usedParams: { ...params }, error: e.message });
       }
