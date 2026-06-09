@@ -125,13 +125,13 @@ class SceneManager {
     dirLight.shadow.bias = -0.001;
     this.scene.add(dirLight);
 
-    const cyanLight = new THREE.PointLight(0x00e5ff, 0.4, 80);
-    cyanLight.position.set(20, 25, 30);
-    this.scene.add(cyanLight);
+    const fillLight1 = new THREE.PointLight(0xddeeff, 0.3, 80);
+    fillLight1.position.set(20, 25, 30);
+    this.scene.add(fillLight1);
 
-    const magentaLight = new THREE.PointLight(0xe040fb, 0.3, 80);
-    magentaLight.position.set(60, 25, -20);
-    this.scene.add(magentaLight);
+    const fillLight2 = new THREE.PointLight(0xffeedd, 0.2, 80);
+    fillLight2.position.set(60, 25, -20);
+    this.scene.add(fillLight2);
   }
 
   _buildFloor() {
@@ -183,11 +183,11 @@ class SceneManager {
 
   _createAccent() {
     return new THREE.MeshPhysicalMaterial({ 
-      color: 0x00e5ff, 
-      roughness: 0.2, 
-      metalness: 0.1,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.1
+      color: 0x2563eb, 
+      roughness: 0.3, 
+      metalness: 0.2,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.2
     });
   }
 
@@ -201,7 +201,7 @@ class SceneManager {
   }
 
   _createGhostMat() {
-    return new THREE.MeshPhysicalMaterial({ color: 0xff5252, roughness: 0.3, metalness: 0.5, transparent: true, opacity: 0.35, emissive: 0xff5252, emissiveIntensity: 0.2, clearcoat: 0.5, clearcoatRoughness: 0.2 });
+    return new THREE.MeshPhysicalMaterial({ color: 0xdc2626, roughness: 0.4, metalness: 0.3, transparent: true, opacity: 0.35, clearcoat: 0.3, clearcoatRoughness: 0.3 });
   }
 
   _buildGantry() {
@@ -216,7 +216,7 @@ class SceneManager {
       rail.castShadow = true; rail.receiveShadow = true;
       this.gantryGroup.add(rail);
 
-      const strip = new THREE.Mesh(new THREE.BoxGeometry(this.railLength, 0.2, 1.0), this._createAccent(0x00e5ff));
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(this.railLength, 0.2, 1.0), this._createAccent());
       strip.position.set(this.railLength / 2, this.railHeight + 1.0, zOff);
       this.gantryGroup.add(strip);
 
@@ -414,7 +414,7 @@ class SceneManager {
   _buildObject() {
     this.objectMesh = new THREE.Mesh(
       new THREE.BoxGeometry(2, 2, 2),
-      new THREE.MeshStandardMaterial({ color: 0xffaa00, roughness: 0.3, metalness: 0.4, emissive: 0xffaa00, emissiveIntensity: 0.1 })
+      new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.4 })
     );
     this.objectMesh.position.set(this.objectDefaultPos.x, this.objectDefaultPos.y, this.objectDefaultPos.z);
     this.objectMesh.castShadow = true;
@@ -423,13 +423,13 @@ class SceneManager {
 
   _buildMarkers() {
     const markerGeo = new THREE.RingGeometry(2.5, 3.2, 32);
-    this.pickMarker = new THREE.Mesh(markerGeo, new THREE.MeshStandardMaterial({ color: 0x00e676, side: THREE.DoubleSide, emissive: 0x00e676, emissiveIntensity: 0.5, transparent: true, opacity: 0.7 }));
+    this.pickMarker = new THREE.Mesh(markerGeo, new THREE.MeshStandardMaterial({ color: 0x16a34a, side: THREE.DoubleSide, transparent: true, opacity: 0.6 }));
     this.pickMarker.rotation.x = -Math.PI / 2;
     // Set marker on the table surface
     this.pickMarker.position.set(this.objectDefaultPos.x, this.railHeight + 0.1, this.objectDefaultPos.z);
     this.scene.add(this.pickMarker);
 
-    this.placeMarker = new THREE.Mesh(markerGeo, new THREE.MeshStandardMaterial({ color: 0xe040fb, side: THREE.DoubleSide, emissive: 0xe040fb, emissiveIntensity: 0.5, transparent: true, opacity: 0.7 }));
+    this.placeMarker = new THREE.Mesh(markerGeo, new THREE.MeshStandardMaterial({ color: 0xea580c, side: THREE.DoubleSide, transparent: true, opacity: 0.6 }));
     this.placeMarker.rotation.x = -Math.PI / 2;
     // Set marker on the table surface
     this.placeMarker.position.set(65, this.railHeight + 0.1, this.objectDefaultPos.z);
@@ -439,21 +439,21 @@ class SceneManager {
   _buildVibrationIndicators() {
     const ringGeo = new THREE.TorusGeometry(1.5, 0.2, 8, 32);
     
-    this.shapedVibRing = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.8 }));
+    this.shapedVibRing = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0x2563eb, transparent: true, opacity: 0.7 }));
     this.shapedVibRing.rotation.x = Math.PI/2;
     this.shapedVibRing.visible = false;
     this.scene.add(this.shapedVibRing);
 
-    this.unshapedVibRing = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xff5252, transparent: true, opacity: 0.8 }));
+    this.unshapedVibRing = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xdc2626, transparent: true, opacity: 0.7 }));
     this.unshapedVibRing.rotation.x = Math.PI/2;
     this.unshapedVibRing.visible = false;
     this.scene.add(this.unshapedVibRing);
   }
 
   _buildTrails() {
-    this.shapedTrail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.6 }));
+    this.shapedTrail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x2563eb, transparent: true, opacity: 0.5 }));
     this.scene.add(this.shapedTrail);
-    this.unshapedTrail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xff5252, transparent: true, opacity: 0.4 }));
+    this.unshapedTrail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xdc2626, transparent: true, opacity: 0.35 }));
     this.scene.add(this.unshapedTrail);
   }
 
