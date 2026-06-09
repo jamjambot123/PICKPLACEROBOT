@@ -61,30 +61,32 @@ class SceneManager {
   _init() {
     // Scene
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x08090e);
-    this.scene.fog = new THREE.FogExp2(0x08090e, 0.008);
+    this.scene.background = new THREE.Color(0x1a1d23);
+    this.scene.fog = new THREE.FogExp2(0x1a1d23, 0.004);
 
-    // Camera
+    // Camera — front-facing, slightly elevated for clear overview
     const aspect = this.container.clientWidth / this.container.clientHeight;
-    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 500);
-    this.camera.position.set(50, 35, 55);
-    this.camera.lookAt(40, 8, 0);
+    this.camera = new THREE.PerspectiveCamera(40, aspect, 0.1, 500);
+    this.camera.position.set(40, 30, 65);
+    this.camera.lookAt(40, 10, 0);
 
-    // Renderer
+    // Renderer — photorealistic settings
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
+    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.physicallyCorrectLights = true;
+    this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.container.appendChild(this.renderer.domElement);
 
     // Orbit Controls
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
-    this.controls.target.set(40, 8, 0);
+    this.controls.target.set(40, 10, 0);
     this.controls.minDistance = 20;
     this.controls.maxDistance = 200;
     this.controls.maxPolarAngle = Math.PI * 0.85;
@@ -108,44 +110,56 @@ class SceneManager {
   }
 
   _setupLights() {
-    this.scene.add(new THREE.AmbientLight(0x2a2a3e, 0.6));
-    this.scene.add(new THREE.HemisphereLight(0x4466aa, 0x222233, 0.4));
+    // Key light — warm overhead directional (sun-like)
+    const ambient = new THREE.AmbientLight(0x404050, 0.4);
+    this.scene.add(ambient);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    // Hemisphere: sky=cool blue, ground=warm — natural indoor factory feel
+    const hemi = new THREE.HemisphereLight(0xb0c4de, 0x3a3228, 0.5);
+    this.scene.add(hemi);
+
+    // Main directional (key light)
+    const dirLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
     dirLight.position.set(30, 50, 40);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.mapSize.set(2048, 2048);
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 150;
     dirLight.shadow.camera.left = -50;
     dirLight.shadow.camera.right = 50;
     dirLight.shadow.camera.top = 50;
     dirLight.shadow.camera.bottom = -20;
-    dirLight.shadow.bias = -0.001;
+    dirLight.shadow.bias = -0.0005;
+    dirLight.shadow.normalBias = 0.02;
     this.scene.add(dirLight);
 
-    const fillLight1 = new THREE.PointLight(0xddeeff, 0.3, 80);
-    fillLight1.position.set(20, 25, 30);
+    // Fill light — cool side (subtle)
+    const fillLight1 = new THREE.PointLight(0xddeeff, 0.15, 100);
+    fillLight1.position.set(10, 20, 40);
     this.scene.add(fillLight1);
 
-    const fillLight2 = new THREE.PointLight(0xffeedd, 0.2, 80);
-    fillLight2.position.set(60, 25, -20);
-    this.scene.add(fillLight2);
+    // Rim light — backlight for depth separation
+    const rimLight = new THREE.PointLight(0xffeedd, 0.15, 100);
+    rimLight.position.set(70, 20, -25);
+    this.scene.add(rimLight);
   }
 
   _buildFloor() {
-    const grid = new THREE.GridHelper(120, 60, 0x1a1b2e, 0x111222);
+    // Subtle grid — faded engineering grid lines
+    const grid = new THREE.GridHelper(120, 60, 0x2a2d35, 0x22252b);
     grid.position.set(40, 0, 0);
+    grid.material.transparent = true;
+    grid.material.opacity = 0.4;
     this.scene.add(grid);
 
-    const floorGeo = new THREE.PlaneGeometry(140, 140);
+    // Factory floor — dark concrete look with subtle reflections
+    const floorGeo = new THREE.PlaneGeometry(160, 160);
     const floorMat = new THREE.MeshPhysicalMaterial({ 
-      color: 0x0a0b12, 
-      roughness: 0.8, 
-      metalness: 0.2,
-      clearcoat: 0.1,
-      clearcoatRoughness: 0.5
+      color: 0x1e2028, 
+      roughness: 0.85, 
+      metalness: 0.05,
+      clearcoat: 0.08,
+      clearcoatRoughness: 0.9
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
