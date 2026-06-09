@@ -86,6 +86,23 @@ class App {
       this.sceneManager.setCarriagePosition(this.params.pickX);
     }
 
+    // === Tab Navigation ===
+    this._initTabs();
+
+    // === New Modules (lazy init on first tab switch) ===
+    this.sweepManager = null;
+    this.sensitivityAnalyzer = null;
+    this.experimentLog = null;
+
+    // Initialize experiment log immediately (needs to be ready for auto-save)
+    try {
+      if (window.ExperimentLog) {
+        this.experimentLog = new ExperimentLog('explog-container');
+        this.experimentLog.init();
+        this._updateExpLogBadge();
+      }
+    } catch(e) { console.warn('ExperimentLog init deferred:', e.message); }
+
     // Start render loop
     this._renderLoop();
 
@@ -93,6 +110,70 @@ class App {
     this._computeAndDisplay();
 
     console.log('✦ Pick & Place Robot Simulator initialized');
+  }
+
+  // ══════════════════════════════════════
+  // TAB NAVIGATION
+  // ══════════════════════════════════════
+
+  _initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        this._switchTab(tabName);
+      });
+    });
+  }
+
+  _switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    if (activeTab) activeTab.classList.add('active');
+
+    // Show/hide config bar (only for simulator tab)
+    const configBar = document.getElementById('config-bar');
+    if (configBar) {
+      configBar.style.display = tabName === 'simulator' ? 'flex' : 'none';
+    }
+
+    // Lazy-init modules
+    if (tabName === 'sweep' && !this.sweepManager && window.SweepManager) {
+      this.sweepManager = new SweepManager('sweep-container');
+      this.sweepManager.init();
+    }
+    if (tabName === 'sensitivity' && !this.sensitivityAnalyzer && window.SensitivityAnalyzer) {
+      this.sensitivityAnalyzer = new SensitivityAnalyzer('sensitivity-container');
+      this.sensitivityAnalyzer.init();
+    }
+    if (tabName === 'explog' && this.experimentLog) {
+      this.experimentLog.renderTable();
+      this._updateExpLogBadge();
+    }
+
+    // Resize 3D scene if switching back to simulator
+    if (tabName === 'simulator' && this.sceneManager) {
+      setTimeout(() => this.sceneManager.resize(), 100);
+    }
+  }
+
+  _updateExpLogBadge() {
+    const badge = document.getElementById('explog-badge');
+    if (badge && this.experimentLog) {
+      const count = this.experimentLog.getCount();
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
   }
 
   // ══════════════════════════════════════

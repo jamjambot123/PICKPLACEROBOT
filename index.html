@@ -26,8 +26,29 @@
 <body>
   <div id="app">
     
+    <!-- ═══ TAB NAVIGATION ═══ -->
+    <nav class="tab-nav" id="tab-nav">
+      <button class="tab-btn active" data-tab="simulator">
+        <span class="tab-icon">🎮</span>
+        <span class="tab-label">시뮬레이터</span>
+      </button>
+      <button class="tab-btn" data-tab="sweep">
+        <span class="tab-icon">📊</span>
+        <span class="tab-label">파라미터 스윕</span>
+      </button>
+      <button class="tab-btn" data-tab="sensitivity">
+        <span class="tab-icon">📈</span>
+        <span class="tab-label">민감도 분석</span>
+      </button>
+      <button class="tab-btn" data-tab="explog">
+        <span class="tab-icon">📋</span>
+        <span class="tab-label">실험 이력</span>
+        <span class="tab-badge" id="explog-badge" style="display:none;">0</span>
+      </button>
+    </nav>
+
     <!-- ═══ ACADEMIC CONFIG BAR (TOP) ═══ -->
-    <header class="config-bar">
+    <header class="config-bar" id="config-bar">
       <div class="config-brand">
         <span class="icon">⚙</span>
         <h1>디지털 트윈 시뮬레이터</h1>
@@ -99,6 +120,9 @@
 
     <!-- ═══ FULLSCREEN VIEWPORT ═══ -->
     <div class="main-content">
+
+      <!-- TAB 1: Simulator (existing) -->
+      <div class="tab-content active" id="tab-simulator">
       <div class="viewport-area">
         <div id="viewport" class="viewport-container">
           
@@ -173,7 +197,42 @@
         </div>
         
       </div>
-    </div>
+      </div><!-- end tab-simulator -->
+
+      <!-- TAB 2: Parameter Sweep -->
+      <div class="tab-content" id="tab-sweep">
+        <div class="tab-page">
+          <div class="tab-page-header">
+            <h2>📊 파라미터 스윕 실험</h2>
+            <p>2개의 파라미터를 선택하여 자동 순회 실험을 수행하고, 결과를 히트맵으로 시각화합니다.</p>
+          </div>
+          <div id="sweep-container"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Sensitivity Analysis -->
+      <div class="tab-content" id="tab-sensitivity">
+        <div class="tab-page">
+          <div class="tab-page-header">
+            <h2>📈 민감도 분석</h2>
+            <p>시스템 고유진동수(fn) 추정 오차에 대한 각 Input Shaper의 강건성(Robustness)을 분석합니다.</p>
+          </div>
+          <div id="sensitivity-container"></div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Experiment Log -->
+      <div class="tab-content" id="tab-explog">
+        <div class="tab-page">
+          <div class="tab-page-header">
+            <h2>📋 실험 이력</h2>
+            <p>수행한 모든 시뮬레이션의 결과를 자동 저장하고, 과거 실험과 비교할 수 있습니다.</p>
+          </div>
+          <div id="explog-container"></div>
+        </div>
+      </div>
+
+    </div><!-- end main-content -->
 
     <!-- ═══ 3-PROFILE COMPARISON MODAL ═══ -->
     <div id="compare-modal" style="display:none; position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center;">
@@ -195,6 +254,9 @@
   <script src="js/robot-kinematics.js"></script>
   <script src="js/scene.js"></script>
   <script src="js/charts.js"></script>
+  <script src="js/sweep.js"></script>
+  <script src="js/sensitivity.js"></script>
+  <script src="js/experiment-log.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
