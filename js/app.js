@@ -140,7 +140,16 @@ class App {
     // Show/hide config bar (only for simulator tab)
     const configBar = document.getElementById('config-bar');
     if (configBar) {
-      configBar.style.display = tabName === 'simulator' ? 'flex' : 'none';
+      // Use visibility + height instead of display to prevent layout shift
+      if (tabName === 'simulator') {
+        configBar.style.visibility = 'visible';
+        configBar.style.height = '60px';
+        configBar.style.overflow = 'visible';
+      } else {
+        configBar.style.visibility = 'hidden';
+        configBar.style.height = '0px';
+        configBar.style.overflow = 'hidden';
+      }
     }
 
     // Lazy-init modules
@@ -159,7 +168,12 @@ class App {
 
     // Resize 3D scene if switching back to simulator
     if (tabName === 'simulator' && this.sceneManager) {
-      setTimeout(() => this.sceneManager.resize(), 100);
+      // Wait for layout to settle, then resize
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          this.sceneManager.resize();
+        });
+      });
     }
   }
 
