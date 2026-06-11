@@ -114,8 +114,15 @@ def gen_ascurve(vmax, amax, beta, gamma, dist, dt=0.001):
     # Apply jerk-limiting via smoothing kernel proportional to beta
     sigma = int(beta * 0.02 / dt)  # beta controls smoothing width
     if sigma > 1:
-        from scipy.ndimage import gaussian_filter1d
-        pos = gaussian_filter1d(pos, sigma=sigma, mode='nearest')
+        # Custom numpy gaussian filter to remove scipy dependency
+        window_size = int(6 * sigma + 1)
+        x = np.arange(-window_size // 2 + 1., window_size // 2 + 1.)
+        kernel = np.exp(-(x**2) / (2 * sigma**2))
+        kernel = kernel / kernel.sum()
+        # Pad array to handle edges like 'nearest' mode
+        pad_size = window_size // 2
+        padded_pos = np.pad(pos, (pad_size, pad_size), mode='edge')
+        pos = np.convolve(padded_pos, kernel, mode='valid')
     
     pos[0] = 0.0
     pos[-1] = dist
