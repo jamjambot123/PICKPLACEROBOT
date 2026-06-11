@@ -9,8 +9,11 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import csv, sys
 
-# Fix encoding
-sys.stdout.reconfigure(encoding='utf-8')
+# Fix encoding (handle IDLE environment)
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except AttributeError:
+    pass
 
 plt.rcParams.update({
     'font.size': 11, 'axes.titlesize': 13, 'axes.labelsize': 11,

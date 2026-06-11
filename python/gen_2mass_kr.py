@@ -1,4 +1,8 @@
-import sys; sys.stdout.reconfigure(encoding='utf-8')
+import sys
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except AttributeError:
+    pass
 import numpy as np
 from pathlib import Path
 import matplotlib

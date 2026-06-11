@@ -1,5 +1,9 @@
 """ZVD 파괴적 간섭 차트 — 한국어 버전"""
-import sys; sys.stdout.reconfigure(encoding='utf-8')
+import sys
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except AttributeError:
+    pass
 import numpy as np
 from pathlib import Path
 import matplotlib

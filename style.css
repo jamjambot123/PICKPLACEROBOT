@@ -1053,3 +1053,24 @@ input:checked + .slider-toggle:before {
   animation: flash-row 1.5s ease-out;
 }
 
+
+
+/* Floating Button */
+.btn-floating {
+  position: absolute;
+  z-index: 100;
+  padding: 8px 16px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+}
+.btn-floating:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}

@@ -1,5 +1,9 @@
 """발표에 필요한 누락 차트 전부 생성"""
-import sys; sys.stdout.reconfigure(encoding='utf-8')
+import sys
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except AttributeError:
+    pass
 sys.path.insert(0, r'd:\dongwon\PICKPLACEROBOT\python')
 from run_all_experiments import *
 import numpy as np
